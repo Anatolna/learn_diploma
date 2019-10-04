@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/Users/odaoda/projects/learn_diploma_Sasha_Olga/env/bin/python3",
+    "python.linting.flake8Args": [
+        "flake8"
+    ]
+}
