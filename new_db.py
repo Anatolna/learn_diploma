@@ -50,19 +50,19 @@ session = sessionmaker(bind=engine)()
 
 
 posts = oda_comments.posts_collector(access_token, api_version, offset, count, domain)
+
+
+for entity in posts:
+    # all_posts = Posts(id_post=post['id'], post=post['text'], date=post['date'].datetime.strftime('%d-%m-%Y'))
+    # comments = comments_collector(post['id'])
+    all_posts = Posts(id_post=entity['id'], post=entity['text']  # , date=datetime.fromtimestamp(entity['date']).strftime('%d/%m/%y %H:%M'))
+    session.add(all_posts)
+    session.new
+    session.commit()
+
+
 post = input('введите номер поста: ')
 comms = oda_comments.comments_collector(post, access_token, api_version, offset, count, domain)
-
-
-# for entity in posts:
-#     # all_posts = Posts(id_post=post['id'], post=post['text'], date=post['date'].datetime.strftime('%d-%m-%Y'))
-#     # comments = comments_collector(post['id'])
-#     all_posts = Posts(id_post=entity['id'], post=entity['text']  # , date=datetime.fromtimestamp(entity['date']).strftime('%d/%m/%y %H:%M'))
-#     session.add(all_posts)
-#     session.new
-#     session.commit()
-
-
 for comment in comms:
     all_comment = Comments(id_post=comment['post_id'], comment=comment['comms'], id_comm=123)
     session.add(all_comment)

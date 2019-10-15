@@ -53,11 +53,16 @@ posts_collector(access_token, api_version, offset, count, domain)
 
 # собираем коменты к посту ()
 
+check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName',{
+                'screen_name': domain,
+                'access_token': access_token,
+                'v': api_version,
+                    })
+owner_id = 0 - check_inputed.json()["response"]['object_id']
+
 
 post = input('введите номер поста: ')
-
-
-def comments_collector(post, access_token, api_version, offset, count, domain):
+def comments_collector(post, access_token, api_version, offset, count, domain, owner_id):
     comments = []
     r_comms = requests.get('https://api.vk.com/method/wall.getComments', {
                         'domain': domain,
@@ -66,10 +71,10 @@ def comments_collector(post, access_token, api_version, offset, count, domain):
                         'access_token': access_token,
                         'v': api_version,
                         'post_id': post,
-                        'owner_id': -18098621,
+                        'owner_id': owner_id,
                         }
                         )
-    # print(len(r_comms.json()["response"]['items']))
+    print(r_comms.json()["response"]['items'])
     for comms in r_comms.json()['response']['items']:
         comments.append({
             'post_id': comms['post_id'],
@@ -81,7 +86,7 @@ def comments_collector(post, access_token, api_version, offset, count, domain):
     return comments
 
 
-comments_collector(post, access_token, api_version, offset, count, domain)
+comments_collector(post, access_token, api_version, offset, count, domain, owner_id)
 
 
 # if __name__ == "__main__":
