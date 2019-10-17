@@ -5,8 +5,8 @@ import settings
 
 access_token = settings.access_token
 api_version = 5.101
-offset = 5
-count = 0
+offset = 0
+count = 100
 # session = vk.Session(access_token=access_token)
 # api = vk.API(session, v=api_version)
 domain = input('Введите домен сообщества: ')
@@ -25,14 +25,18 @@ def posts_collector(access_token, api_version, offset, count, domain):
     # except (requests.RequestException, ValueError, TypeError):
     # print('Ошибка ввода. Перепроверьте, что введенный домен существует')
     # print(req_wall.json()["response"]['items'])
-    for post in req_wall.json()['response']['items']:
-        posts.append({
-            'id': post['id'],
-            'text': post['text'],
-            'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M')
-            })
-    return posts
-    # print(len(posts))
+    member_count = req_wall.json()['response']['count']
+    print('количество постов = ', member_count)
+    for offset in range(0, 300):
+        for post in req_wall.json()['response']['items']:
+            posts.append({
+                'id': post['id'],
+                'text': post['text'],
+                'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M')
+                })
+    count = offset + 1
+        # return posts
+    print(len(posts))
 
 
 posts_collector(access_token, api_version, offset, count, domain)
@@ -61,6 +65,10 @@ def comments_collector(post, access_token, api_version, offset, count, domain, o
                         'owner_id': owner_id,
                         })
     # print(req_comms.json()["response"]['items'])
+    deleted_comms = []
+    # for del_com
+    # if req_comms.json()['response']['delete': True]:
+    #     print(req_comms.json())
     for comms in req_comms.json()['response']['items']:
         comments.append({
             'post_id': comms['post_id'],
