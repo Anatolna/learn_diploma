@@ -15,7 +15,7 @@ domain = 'tele2'
 def posts_collector(access_token, api_version, offset, count, domain):
     posts = []
     # try:
-    for offset in range(0, 500, 100):  # добавила цикл, чтобы получать больше, чем 100 постов
+    for offset in range(0, 100, 100):  # добавила цикл, чтобы получать больше, чем 100 постов
         req_wall = requests.get('https://api.vk.com/method/wall.get', {
                     'domain': domain,
                     'offset': offset,
@@ -52,8 +52,9 @@ check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName'
                     'access_token': access_token,
                     'v': api_version,
                     })
+
 owner_id = 0 - (check_inputed.json()["response"]['object_id'])
-# print(owner_id)
+# print("ID!!!!!!!!", owner_id)
 
 
 post = input('Введите id поста: ')
@@ -74,10 +75,13 @@ def comments_collector(post, access_token, api_version, offset, count_comm, doma
                             })
     # print(req_comms.json()["response"]['items'])
         time.sleep(0.5)
-        for comms in req_comms.json()['response']['items']:
+        all_comments = req_comms.json()['response']['items']
+        # print("ALL!!!!!!!", len(all_comments))
+        for comms in all_comments:
             if 'post_id' in comms.keys():  # берем только комменты, где есть post_id (и текст)
                 comments.append({
                     'post_id': comms['post_id'],
+                    'id_comm': comms['id'],
                     'comms': comms['text'],
                     'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
                     })

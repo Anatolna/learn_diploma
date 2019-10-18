@@ -10,7 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # import settings
 import posts_comm_oda
-from posts_comm_oda import access_token, api_version, offset, count, domain, owner_id
+from posts_comm_oda import access_token, api_version, offset, count, domain, owner_id, count_comm
 # from sqlalchemy.orm import relationship
 
 
@@ -60,7 +60,7 @@ for entity in posts:
 
 
 post = input('Введите номер поста: ')
-comms = posts_comm_oda.comments_collector(post, access_token, api_version, owner_id, offset, count, domain)
+comms = posts_comm_oda.comments_collector(post, access_token, api_version, offset, count_comm, domain, owner_id)
 for comment in comms:
     all_comment = Comments(id_post=comment['post_id'], comment=comment['comms'], id_comm=comment['id_comm'])
     session.add(all_comment)
