@@ -59,8 +59,8 @@ for entity in posts:
     session.commit()
 
 
-post = input('Введите номер поста: ')
-comms = posts_comm_oda.comments_collector(post, access_token, api_version, offset, count_comm, domain, owner_id)
+# post = input('Введите номер поста: ')
+comms = posts_comm_oda.comments_collector(posts, access_token, api_version, offset, count_comm, domain, owner_id)
 for comment in comms:
     all_comment = Comments(id_post=comment['post_id'], comment=comment['comms'], id_comm=comment['id_comm'])
     session.add(all_comment)
