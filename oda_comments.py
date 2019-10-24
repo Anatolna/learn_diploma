@@ -1,6 +1,7 @@
 import emoji
 import vk
 import requests
+import time
 from datetime import datetime
 
 
@@ -10,7 +11,7 @@ import settings
 access_token = settings.access_token
 api_version = 5.101
 offset = 0
-count = 70
+count = 100
 session = vk.Session(access_token=access_token)
 api = vk.API(session, v=api_version)
 # domain = input('Введите домен сообщества: ')
@@ -32,25 +33,13 @@ def posts_collector(access_token, api_version, offset, count, domain):
         posts.append({
             'id': post['id'],
             'text': post['text'],
-            'date': post['date'],
+            # 'date': post['date'],
             'owner_id': post['owner_id'],
-            # 'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M')
+            # 'type_pics_video': post['attachments'][0]['type'],
+            'post_likes': post['likes']['count'],
+            'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M')
             })
-    # id_posts = []
-    # x = (i['id'] for i in posts)
-    # for post_id in x:
-    #     id_posts.append({
-    #         'id': post_id
-    #     })
-    # date_posts = []
-    # d = (i['date'] for i in posts)
-    # for post_date in d:
-    #     date_posts.append({
-    #         'date': post_date
-    #     })
-    # print('len posts = ', len(posts))
-    # print(posts)
-    return posts  #, id_posts, date_posts
+    return posts
 
 
 posts_collector(access_token, api_version, offset, count, domain)
@@ -66,71 +55,76 @@ owner_id = 0 - check_inputed.json()["response"]['object_id']
 
 
 # post = input('введите номер поста: ')
-post = 565886
+post = 572920
+# post = posts_collector(access_token, api_version, offset, count, domain)
 
 
 def comments_collector(post, access_token, api_version,
                        offset, count, domain, owner_id):
     comments = []
-    r_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                        'domain': domain,
-                        'offset': offset,
-                        'count': count,
-                        'access_token': access_token,
-                        'v': api_version,
-                        'post_id': post,
-                        'owner_id': owner_id,
-                        }
-                        )
-    # print(r_comms.json()["response"]['items'])
-    for comms in r_comms.json()['response']['items']:
-        if 'post_id' in comms.keys():
-            comments.append({
-                'post_id': comms['post_id'],
-                'comms': comms['text'],
-                # 'date': post['date'],
-                'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
-                })
+    for offset in range(0, 5):
+        # for one_post in post:
+        r_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                            'domain': domain,
+                            'offset': offset,
+                            'count': count,
+                            'access_token': access_token,
+                            'v': api_version,
+                            'post_id': post,
+                            'owner_id': owner_id,
+                            'need_likes': 1,
+                            }
+                            )
+    # print(len(r_comms.json()["response"]['items']))
+        time.sleep(0.5)
+        all_comms = r_comms.json()['response']['items']
+        for comms in all_comms:
+            if 'post_id' in comms.keys():
+                comments.append({
+                    'post_id': comms['post_id'],
+                    'comms': comms['text'],
+                    'id_comms': comms['id'],
+                    'count_likes': comms['likes']['count'],
+                    # 'date': post['date'],
+                    'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
+                    })
     # print(comments)
     # print(f'len comments = {len(comments)}')
     return comments
 
 
-comments_collector(post, access_token, api_version,
-                   offset, count, domain, owner_id)
-
-# print(emoji.UNICODE_EMOJI)
-emo_comments = comments_collector(post, access_token, api_version,
-                   offset, count, domain, owner_id)
+# comments_collector(post, access_token, api_version,
+                #    offset, count, domain, owner_id)
 
 
-def without_emoji_comms(emo_comments):
-    comms_with_emo = ''
-    for comment in emo_comments:
-        comms_with_emo += ''.join(comment['comms'])
-    # print(comms_with_emo)
-    # non_emoji = ''
-    # for symb in alltexts:
-    #     if symb in emoji.UNICODE_EMOJI:
-    #         non_emoji.replace(symb, '')
-    # print(non_emoji)
-    comms_without_emo = ''
-    for symbol in comms_with_emo:
-        if symbol not in emoji.UNICODE_EMOJI:
-            comms_without_emo += ''.join(symbol)
-    print(comms_without_emo)
-    # clean_text = [''.join(words) for words in allsymb]
-    # print(clean_text)
-    # emoji_list = []
-    # for emo in allsymb:
-    #     # print(emo)
-    #     if emo in emoji.UNICODE_EMOJI:
-    #         emoji_list.append(emo)
-    # print(emoji_list)
-    return comms_without_emo
+def filter_comments(all_comments):
+    long_comments = []
+    for cccc in all_comments:
+        if len(cccc['comms']) > 7:
+            long_comments.append(cccc)
+    return long_comments
 
 
-without_emoji_comms(emo_comments)
+def comms_without_emoji(list_comms):
+    result = []
+    long_comment_from_list_comms = filter_comments(list_comms)
+    for comment in long_comment_from_list_comms:
+        comment_text = comment['comms']
+        for symbol in comment_text:
+            if symbol in emoji.UNICODE_EMOJI.keys():
+                comment_text = comment_text.replace(symbol, '')
+        # print(comment_text)
+        new_comment = comment
+        new_comment['comms'] = comment_text
+        result.append(new_comment)
+    # print(result)
+    return result
+
+
+# comms_with_emo = comments_collector(post, access_token, api_version,
+                                    # offset, count, domain, owner_id)
+# print(comms_without_emoji(comms_with_emo))
+
 
 # if __name__ == "__main__":
 # wow = (565886, 554689, 555788, 556333)
