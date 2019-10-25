@@ -8,7 +8,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# import settings
 import posts_comm_oda
 from posts_comm_oda import access_token, api_version, offset, count, domain, owner_id, count_comm
 # from sqlalchemy.orm import relationship
@@ -31,7 +30,7 @@ class Posts(Base):  # делаем табличку с полями для по�
     id = Column(Integer, primary_key=True)
     id_post = Column(Integer)
     post = Column(String)
-    # date = Column(DateTime)
+    date_post = Column(DateTime)
 
 
 class Comments(Base):  # # делаем табличку с полями для комментов
@@ -40,29 +39,38 @@ class Comments(Base):  # # делаем табличку с полями для 
     id_post = Column(Integer)
     id_comm = Column(Integer)
     comment = Column(String)
-    # num_likes = Column(Integer)
-    # date = Column(DateTime)
+    num_likes = Column(Integer)
+    date_comm = Column(DateTime)
 
 
 Base.metadata.create_all(engine)
 session = sessionmaker(bind=engine)()
 
 
-posts = posts_comm_oda.posts_collector(access_token, api_version, offset, count, domain)
+posts = posts_comm_oda.posts_collector(access_token, api_version,
+                                       offset, count, domain)
 for entity in posts:
-    # all_posts = Posts(id_post=post['id'], post=post['text'], date=post['date'].datetime.strftime('%d-%m-%Y'))
-    # comments = comments_collector(post['id'])
-    all_posts = Posts(id_post=entity['id'], post=entity['text'])
-        # date=datetime.fromtimestamp(entity['date']).strftime('%d/%m/%y %H:%M'))
+    all_posts = Posts(id_post=entity['id'],
+                      post=entity['text'],
+                      date_post=datetime.strptime(entity['date_post'], '%d/%m/%y %H:%M'),
+                      )
     session.add(all_posts)
     session.new
     session.commit()
 
 
 # post = input('Введите номер поста: ')
-comms = posts_comm_oda.comments_collector(posts, access_token, api_version, offset, count_comm, domain, owner_id)
-for comment in comms:
-    all_comment = Comments(id_post=comment['post_id'], comment=comment['comms'], id_comm=comment['id_comm'])
+comms_dirty = posts_comm_oda.comments_collector(posts, access_token,
+                                                api_version, offset,
+                                                count_comm, domain, owner_id)
+comms_clean = posts_comm_oda.comms_without_emoji(comms_dirty)                                      
+for comment in comms_clean:
+    all_comment = Comments(id_post=comment['post_id'],
+                           id_comm=comment['id_comm'],
+                           comment=comment['comms'],
+                           num_likes=comment['count_likes'],
+                           date_comm=datetime.strptime(comment['date_comm'], '%d/%m/%y %H:%M'),
+                           )
     session.add(all_comment)
     session.new
     session.commit()

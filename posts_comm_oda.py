@@ -1,20 +1,21 @@
+import emoji
 import requests
 from datetime import datetime
 import time
 import settings
 
 
-access_token = settings.access_token
+access_token = settings.API_KEY
 api_version = 5.101
 offset = 0
-count = 100
+count = 10
 domain = input('Введите домен сообщества: ')
 # domain = 'tele2'
 
 
 def posts_collector(access_token, api_version, offset, count, domain):
     posts = []
-    for offset in range(0, 100, 100):  # добавила цикл, чтобы получать больше, чем 100 постов
+    for offset in range(0, 100, 100):  # добавила цикл, чтобы получать больше 100 постов
         req_wall = requests.get('https://api.vk.com/method/wall.get', {
                     'domain': domain,
                     'offset': offset,
@@ -34,7 +35,7 @@ def posts_collector(access_token, api_version, offset, count, domain):
             posts.append({
                 'id': post['id'],
                 'text': post['text'],
-                'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M'),
+                'date_post': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M'),
                 'owner_id': post['owner_id'],
                 })
         print('len posts = ', len(posts))
@@ -69,10 +70,10 @@ def choose_numbers_comments(num_comm):
         return 'Выгружаем все комменты сообщества'
     else:
         return 'Введите ID поста'
-    
+
 
 def comments_collector(posts, access_token, api_version,
-                        offset, count_comm, domain, owner_id):
+                       offset, count_comm, domain, owner_id):
     comments = []
     for post in posts:
         req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
@@ -83,6 +84,7 @@ def comments_collector(posts, access_token, api_version,
                             'v': api_version,
                             'post_id': post['id'],
                             'owner_id': post['owner_id'],
+                            'need_likes': 1
                             })
     # print(req_comms.json()["response"]['items'])
         # for offset in range(0, 10):
@@ -95,20 +97,44 @@ def comments_collector(posts, access_token, api_version,
                     'post_id': comms['post_id'],
                     'id_comm': comms['id'],
                     'comms': comms['text'],
-                    'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
+                    'count_likes': comms['likes']['count'],
+                    'date_comm': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M'),
                     })
     # print(comments)
-    print(f'len comments = {len(comments)}')
+    # print(f'len comments = {len(comments)}')
     return comments
 
-# wow = (565886, 554689, 555788, 556333)
-# for i in wow:
-#     post = i
+
+# comments_collector(posts, access_token, api_version,
+#                    offset, count_comm, domain, owner_id)
 
 
-comments_collector(posts, access_token, api_version, offset, count_comm, domain, owner_id)
+def filter_comments(all_comments):
+    long_comments = []
+    for cccc in all_comments:
+        if len(cccc['comms']) > 7:
+            long_comments.append(cccc)
+    return long_comments
+
+
+def comms_without_emoji(list_comms):
+    result = []
+    long_comment_from_list_comms = filter_comments(list_comms)
+    for comment in long_comment_from_list_comms:
+        comment_text = comment['comms']
+        for symbol in comment_text:
+            if symbol in emoji.UNICODE_EMOJI.keys():
+                comment_text = comment_text.replace(symbol, '')
+        # print(comment_text)
+        new_comment = comment
+        new_comment['comms'] = comment_text
+        result.append(new_comment)
+    # print(result)
+    return result
 
 
 if __name__ == "__main__":
     print('все отработано')
 
+
+# wow = (565886, 554689, 555788, 556333)

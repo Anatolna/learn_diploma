@@ -8,16 +8,38 @@ from datetime import datetime
 import settings
 
 
-access_token = settings.access_token
+access_token = settings.API_KEY
 api_version = 5.101
 offset = 0
 count = 100
 session = vk.Session(access_token=access_token)
 api = vk.API(session, v=api_version)
-# domain = input('Введите домен сообщества: ')
-domain = 'tele2'
+domain = input('Введите домен сообщества: ')
+# domain = 'tele2'
 
 
+def check_domain(domain, access_token, api_version):
+    # domain = input('Введите домен сообщества: ')
+    check_url = 'https://api.vk.com/method/utils.resolveScreenName'
+    check_inputed = requests.get(check_url, {
+                'screen_name': domain,
+                'access_token': access_token,
+                'v': api_version,
+                    })
+    print(check_inputed)
+    ans = check_inputed.json()["response"]
+    # for domain in ans:
+    if 'type' not in ans:
+        if 'type' != 'group':
+            print('Ошибка домена, проверьте имя сообщества')
+    # else:
+    #     owner_id = 0 - ans['object_id']
+    # return domain, owner_id
+
+
+check_domain(domain, access_token, api_version)
+
+"""
 def posts_collector(access_token, api_version, offset, count, domain):
     posts = []
     r_wall = requests.get('https://api.vk.com/method/wall.get', {
@@ -33,7 +55,7 @@ def posts_collector(access_token, api_version, offset, count, domain):
         posts.append({
             'id': post['id'],
             'text': post['text'],
-            # 'date': post['date'],
+            # 'date_post': post['date'],
             'owner_id': post['owner_id'],
             # 'type_pics_video': post['attachments'][0]['type'],
             'post_likes': post['likes']['count'],
@@ -86,7 +108,7 @@ def comments_collector(post, access_token, api_version,
                     'id_comms': comms['id'],
                     'count_likes': comms['likes']['count'],
                     # 'date': post['date'],
-                    'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
+                    'date_comm': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
                     })
     # print(comments)
     # print(f'len comments = {len(comments)}')
@@ -128,3 +150,4 @@ def comms_without_emoji(list_comms):
 
 # if __name__ == "__main__":
 # wow = (565886, 554689, 555788, 556333)
+"""

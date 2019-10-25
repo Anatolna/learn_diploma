@@ -8,7 +8,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-import settings
 import oda_comments
 from oda_comments import access_token, api_version, offset, count, domain, owner_id
 # from sqlalchemy.orm import relationship
@@ -46,8 +45,9 @@ session = sessionmaker(bind=engine)()
 posts = oda_comments.posts_collector(access_token, api_version,
                                      offset, count, domain)
 for entity in posts:
-    all_posts = Posts(id_post=entity['id'], post=entity['text'],
-                      date=datetime.strptime(entity['date'], '%d/%m/%y %H:%M'))
+    all_posts = Posts(id_post=entity['id'],
+                      post=entity['text'],
+                      date=datetime.strptime(entity['date_post'], '%d/%m/%y %H:%M'))
     session.add(all_posts)
     session.new
     session.commit()
@@ -64,7 +64,7 @@ for comment in comms_clean:
                            id_comm=comment['id_comms'],
                            comment=comment['comms'],
                            num_likes=comment['count_likes'],
-                           date=datetime.strptime(comment['date'], '%d/%m/%y %H:%M'),
+                           date=datetime.strptime(comment['date_comm'], '%d/%m/%y %H:%M'),
                            )
     session.add(all_comment)
     session.new
