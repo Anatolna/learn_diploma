@@ -11,14 +11,14 @@ import settings
 access_token = settings.API_KEY
 api_version = 5.101
 offset = 0
-count = 100
+count = 99
 session = vk.Session(access_token=access_token)
 api = vk.API(session, v=api_version)
 domain = input('Введите домен сообщества: ')
 # domain = 'tele2'
 
 
-def check_domain(domain, access_token, api_version):
+def is_group(domain, access_token, api_version):
     # domain = input('Введите домен сообщества: ')
     check_url = 'https://api.vk.com/method/utils.resolveScreenName'
     check_inputed = requests.get(check_url, {
@@ -26,48 +26,72 @@ def check_domain(domain, access_token, api_version):
                 'access_token': access_token,
                 'v': api_version,
                     })
-    print(check_inputed)
+    # print(check_inputed)
     ans = check_inputed.json()["response"]
+    # print(ans)
     # for domain in ans:
-    if 'type' not in ans:
-        if 'type' != 'group':
-            print('Ошибка домена, проверьте имя сообщества')
-    # else:
+    if ans:
+        # if 'type' not in ans:
+        if ans['type'] != 'group':
+            print(f"Ошибка домена, проверьте имя сообщества {ans['type']}")
+            return
+            
+    else:
+        print('такого объекта нет')
+        return
+            # owner_id = False
+    # except:
     #     owner_id = 0 - ans['object_id']
-    # return domain, owner_id
+    # print(owner_id)        
+    return domain  # , owner_id
 
 
-check_domain(domain, access_token, api_version)
+# is_group(domain, access_token, api_version)
 
-"""
+
 def posts_collector(access_token, api_version, offset, count, domain):
-    posts = []
-    r_wall = requests.get('https://api.vk.com/method/wall.get', {
-                        'domain': domain,
-                        'offset': offset,
-                        'count': count,  # count - кол-во постов на выходе
-                        'access_token': access_token,
-                        'v': api_version,
-                        }
-                        )
-    # print(r_wall.json()["response"]['items'])
-    for post in r_wall.json()['response']['items']:
-        posts.append({
-            'id': post['id'],
-            'text': post['text'],
-            # 'date_post': post['date'],
-            'owner_id': post['owner_id'],
-            # 'type_pics_video': post['attachments'][0]['type'],
-            'post_likes': post['likes']['count'],
-            'date': datetime.fromtimestamp(post['date']).strftime('%d/%m/%y %H:%M')
-            })
-    return posts
+    if is_group(domain, access_token, api_version):
+        posts = []
+        r_wall = requests.get('https://api.vk.com/method/wall.get', {
+                            'domain': domain,
+                            'offset': offset,
+                            'count': count,  # count - кол-во постов на выходе
+                            'access_token': access_token,
+                            'v': api_version,
+                            }
+                            )
+        # print(r_wall.json()["response"]['items'])
+        time.sleep(0.5)
+        itemes = r_wall.json()['response']['items']
+        for post in itemes:
+            dict_post = {
+                'id': post['id'],
+                'text': post['text'],
+                # 'date_post': post['date'],
+                'owner_id': post['owner_id'],
+                'post_likes': post['likes']['count'],
+                'date': datetime.fromtimestamp(post['date'])\
+                .strftime('%d/%m/%y %H:%M')
+                }
+            # print(post.keys())
+            if post.get('attachments'):
+            # if 'attachments' in post:
+                attachments = post['attachments']
+                for attach in attachments:
+                    if attach['type'] == 'photo':
+                        # print(post)
+                        dict_post['post_pics'] = True
+                    else:
+                        dict_post['post_pics'] = False
+            posts.append(dict_post)
+        print('число постов = ', len(posts))
+        return posts
 
 
 posts_collector(access_token, api_version, offset, count, domain)
 
 # собираем коменты к посту ()
-
+"""
 check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName',{
                 'screen_name': domain,
                 'access_token': access_token,

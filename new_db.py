@@ -1,16 +1,19 @@
-# import os
+import os
 # import sqlalchemy
 # import sys
 
 from datetime import datetime
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 import oda_comments
 from oda_comments import access_token, api_version, offset, count, domain, owner_id
 # from sqlalchemy.orm import relationship
+
+
+os.remove(r"db_test.db")
 
 
 engine = create_engine('sqlite:///db_test.db', echo=True)
@@ -24,6 +27,8 @@ class Posts(Base):  # делаем табличку с полями для по�
     __tablename__ = 'VK_posts'
     id = Column(Integer, primary_key=True)
     id_post = Column(Integer)
+    likes = Column(Integer)
+    pics = Column(Boolean)
     post = Column(String)
     date = Column(DateTime)
 
@@ -46,8 +51,11 @@ posts = oda_comments.posts_collector(access_token, api_version,
                                      offset, count, domain)
 for entity in posts:
     all_posts = Posts(id_post=entity['id'],
+                      likes=entity['post_likes'],
                       post=entity['text'],
-                      date=datetime.strptime(entity['date_post'], '%d/%m/%y %H:%M'))
+                      date=datetime.strptime(entity['date'], '%d/%m/%y %H:%M'),
+                      pics=entity['post_pics'],
+                      )
     session.add(all_posts)
     session.new
     session.commit()
