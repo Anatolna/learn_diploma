@@ -103,6 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# private files
 struggle*
 settings.py
 db_*
@@ -115,3 +116,4 @@ parsing*
 *Test*
 posts_comms_oda.ipynb
 *.db
+*oda*
