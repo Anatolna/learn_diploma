@@ -10,13 +10,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import parser
 from parser import access_token, api_version, offset, count, domain, owner_id
-# from sqlalchemy.orm import relationship
-
-
 # os.remove(r"db_test2.db")
 
 
-engine = create_engine('sqlite:///create_db.db', echo=True)
+engine = create_engine('sqlite:///vkapp.db', echo=True)
 """выбираем, с какой базой хотим работать (sqlite)
 и в какой файлик записываем"""
 Base = declarative_base()
@@ -29,7 +26,7 @@ class Posts(Base):  # делаем табличку с полями для по�
     id_post = Column(Integer)
     likes = Column(Integer)
     pics = Column(Boolean)
-    post = Column(String)
+    post = Column(String, nullable=False)
     date = Column(DateTime)
 
 

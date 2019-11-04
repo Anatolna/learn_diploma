@@ -1,15 +1,17 @@
 import emoji
 from datetime import datetime
+from flask import current_app
 import requests
 import time
-import settings
+import vkapp.settings
 
 
-access_token = settings.API_KEY
+access_token = vkapp.settings.API_KEY
 api_version = 5.101
 offset = 0
 count = 100
-domain = input('Введите сообщество: ')
+domain = 'potomuchtoludi'
+# domain = input('Введите сообщество: ')
 # owner_id_inputed = input('Введите сообщество: ')
 
 

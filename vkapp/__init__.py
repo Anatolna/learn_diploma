@@ -1,11 +1,13 @@
 from flask import Flask, render_template
-from parser import posts_collector, comments_collector
-from parser import access_token, api_version, offset, count, domain, owner_id, posts
+# from vkapp.dbdb import Base
+from vkapp.parser import posts_collector, comments_collector
+from vkapp.parser import access_token, api_version, offset, count, domain, owner_id, posts
 
 
 def create_app():
     app = Flask(__name__)
-
+    # app.config.from_pyfile('settings.py')
+    # Base.init_app(app)
 
     @app.route('/')
     def show_posts():
@@ -27,7 +29,6 @@ def create_app():
                                num_likes=number_likes,
                                num_pics=number_pics,
                                )
-
 
     @app.route('/')
     def show_comms():
