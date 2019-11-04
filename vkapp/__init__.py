@@ -1,17 +1,26 @@
 from flask import Flask, render_template
 # from vkapp.dbdb import Base
-from vkapp.parser import posts_collector, comments_collector
-from vkapp.parser import access_token, api_version, offset, count, domain, owner_id, posts
+from vkapp.inputform import Inputform
+from vkapp.parser import posts_collector, comments_collector, show_posts
+from vkapp.parser import access_token, api_version, offset, count, domain, posts
 
 
 def create_app():
     app = Flask(__name__)
-    # app.config.from_pyfile('settings.py')
+    app.config.from_pyfile('settings.py')
     # Base.init_app(app)
 
+
     @app.route('/')
-    def show_posts():
-        title = 'Статистика группы:'
+    def input_domain():
+        title = 'Выбор домена сообщества'
+        input_form = Inputform()
+        return render_template('input.html', page_title=title,
+                               form=input_form)
+
+    @app.route('/1')
+    def show_post():
+        title = 'Статистика группы'
         get_posts = posts_collector(access_token, api_version,
                                     offset, count, domain)
         # print(get_posts)

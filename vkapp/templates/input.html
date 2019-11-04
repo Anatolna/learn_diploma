@@ -12,12 +12,18 @@
   </head>
   <body>
     <div class='container'>
-    <h1>Статистика сообщества:</h1>
-    <h2>Число постов в данном сообществе: {{ len_posts }}</h2>
-    <h2>Число лайков у всех постов: {{ num_likes }}</h2>
-    <h2>Число постов с картинками: {{num_pics}}</h2>
-    <h3>Число всех комментов в сообществе: {{ len_comms }}</h3>
-    <h3>Число лайков у комментариев: {{ comm_likes }}</h3>
+    <h1>{{ page_title }}</h1>
+    <div class="row"></div>
+      <form action="" method="GET">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+              {{ form.domain.label}}
+              {{ form.domain() }}
+          </div>
+          {{ form.submit() }}
+      </form>
+    
+    
     </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

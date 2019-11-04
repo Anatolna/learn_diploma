@@ -109,16 +109,18 @@ def posts_collector(access_token, api_version, offset, count, domain):
 
 # posts_collector(access_token, api_version, offset, count, domain)
 
-try:
-    check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName', {
-            'screen_name': domain,
-            'access_token': access_token,
-            'v': api_version,
-            })
-    owner_id = 0 - check_inputed.json()["response"]['object_id']
-    # print(owner_id)
-except (requests.RequestException, ValueError):
-    print('Сетевая ошибка')
+def check(domain, access_token, api_version):
+    try:
+        check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName', {
+                'screen_name': domain,
+                'access_token': access_token,
+                'v': api_version,
+                })
+        owner_id = 0 - check_inputed.json()["response"]['object_id']
+        # print(owner_id)
+    except (requests.RequestException, ValueError):
+        print('Сетевая ошибка')
+    return owner_id
 
 
 posts = posts_collector(access_token, api_version, offset, count, domain)
@@ -258,6 +260,21 @@ def comms_without_emoji(list_comms):
 # comms_with_emo = comments_collector(posts, access_token, api_version,
 # offset, owner_id)
 # print(comms_without_emoji(comms_with_emo))
+
+
+def show_posts():
+    get_posts = posts_collector(access_token, api_version,
+                                offset, count, domain)
+    # print(get_posts)
+    number_likes = 0
+    number_pics = 0
+
+    for post in get_posts:
+        if post.get('post_pics'):
+            number_pics += 1
+
+        number_likes += post['post_likes']
+    return 
 
 
 if __name__ == "__main__":
