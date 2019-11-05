@@ -10,7 +10,7 @@ access_token = vkapp.settings.API_KEY
 api_version = 5.101
 offset = 0
 count = 100
-domain = 'potomuchtoludi'
+# domain = 'potomuchtoludi'
 # domain = input('Введите сообщество: ')
 # owner_id_inputed = input('Введите сообщество: ')
 
@@ -105,7 +105,8 @@ def posts_collector(access_token, api_version, offset, count, domain):
         # print(posts)
         # print('len posts = ', len(posts))
         return posts
-
+    else:
+        return
 
 # posts_collector(access_token, api_version, offset, count, domain)
 
@@ -123,7 +124,7 @@ def check(domain, access_token, api_version):
     return owner_id
 
 
-posts = posts_collector(access_token, api_version, offset, count, domain)
+# posts = posts_collector(access_token, api_version, offset, count, domain)
 
 
 def comments_collector(posts, access_token, api_version, offset, owner_id):
@@ -274,7 +275,7 @@ def show_posts():
             number_pics += 1
 
         number_likes += post['post_likes']
-    return 
+    return number_likes, number_pics
 
 
 if __name__ == "__main__":
