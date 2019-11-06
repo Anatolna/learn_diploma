@@ -51,16 +51,24 @@ def posts_collector(access_token, api_version, offset, count, domain):
         posts = []
         post_read = 0
         try:
-            req_wall = requests.get('https://api.vk.com/method/wall.get', {
-                        'domain': domain,
-                        # 'owner_id': owner_id,
-                        'offset': 0,
-                        'count': 1,
-                        'access_token': access_token,
-                        'v': api_version,
-                        'extended': 1              
-                        })
-            req_wall.raise_for_status()
+            response_present = False
+            while response_present is False:
+                req_wall = requests.get('https://api.vk.com/method/wall.get', {
+                            'domain': domain,
+                            # 'owner_id': owner_id,
+                            'offset': 0,
+                            'count': 1,
+                            'access_token': access_token,
+                            'v': api_version,
+                            'extended': 1              
+                            })
+                req_wall.raise_for_status()
+                if 'response' not in req_wall.json().keys(): 
+                    print("SPIM TYTYTY!!!")                    
+                    time.sleep(0.1)
+                else:
+                    response_present = True
+            
             wall_post_number = req_wall.json()['response']['count']
             # print(wall_post_number)
             while post_read < wall_post_number:
@@ -110,6 +118,7 @@ def posts_collector(access_token, api_version, offset, count, domain):
 
 # posts_collector(access_token, api_version, offset, count, domain)
 
+
 def check(domain, access_token, api_version):
     try:
         check_inputed = requests.get('https://api.vk.com/method/utils.resolveScreenName', {
@@ -119,7 +128,7 @@ def check(domain, access_token, api_version):
                 })
         owner_id = 0 - check_inputed.json()["response"]['object_id']
         # print(owner_id)
-    except (requests.RequestException, ValueError):
+    except(requests.RequestException, ValueError):
         print('Сетевая ошибка')
     return owner_id
 
@@ -128,19 +137,28 @@ def check(domain, access_token, api_version):
 
 
 def comments_collector(posts, access_token, api_version, offset, owner_id):
+    print("in comments collector!!!!")
     comments = []
     for post in posts:
-        req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                            # 'domain': domain,
-                            'offset': 0,
-                            'count': 100,
-                            'access_token': access_token,
-                            'v': api_version,
-                            'post_id': post['id'],
-                            'owner_id': post['owner_id'],
-                            'need_likes': 1
-                            })
-        time.sleep(0.5)
+        print("Post ---------", post['id'])
+        response_present = False
+        while response_present is False:
+            req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                                # 'domain': domain,
+                                'offset': 0,
+                                'count': 100,
+                                'access_token': access_token,
+                                'v': api_version,
+                                'post_id': post['id'],
+                                'owner_id': post['owner_id'],
+                                'need_likes': 1
+                                })
+            if 'response' not in req_comms.json().keys():
+                print("SPIM!!!")
+                time.sleep(0.1)
+            else:
+                response_present = True
+
         wall_comm_number = req_comms.json()['response']['count']
         if wall_comm_number != 0:
             comm_read = len(req_comms.json()['response']['items'])
@@ -149,18 +167,25 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
             all_comments = req_comms.json()['response']['items']
             for comms in all_comments:
                 if comms['thread']['count'] > 0:
-                    req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                                # 'domain': domain,
-                                'offset': 0,
-                                'count': 100,
-                                'access_token': access_token,
-                                'v': api_version,
-                                'post_id': post['id'],
-                                'comment_id': comms['id'],
-                                'owner_id': post['owner_id'],
-                                'need_likes': 1
-                                })
-                    time.sleep(0.8)
+                    comms_response_present = False
+                    while comms_response_present is False:
+                        req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                                    # 'domain': domain,
+                                    'offset': 0,
+                                    'count': 100,
+                                    'access_token': access_token,
+                                    'v': api_version,
+                                    'post_id': post['id'],
+                                    'comment_id': comms['id'],
+                                    'owner_id': post['owner_id'],
+                                    'need_likes': 1
+                                    })
+
+                        if 'response' not in req_comms.json().keys():   
+                            print("SPIM SNOVA!!!")                  
+                            time.sleep(0.1)
+                        else:
+                            comms_response_present = True
                     thread_comments = req_comms.json()['response']['items']
                     for thread_comms in thread_comments:
                         comments.append({
@@ -180,7 +205,7 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
                         'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
                         })
             while comm_read < wall_comm_number:
-                time.sleep(0.5)
+                # time.sleep(0.5)
                 req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
                                 # 'domain': domain,
                                 'offset': comm_read,
@@ -191,6 +216,7 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
                                 'owner_id': post['owner_id'],
                                 'need_likes': 1
                                 })
+                time.sleep(0.1)
                 all_comments = req_comms.json()['response']['items']
                 # print('len(all_comments) = ', len(all_comments))
                 for comms in all_comments:
@@ -206,7 +232,7 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
                                     'owner_id': post['owner_id'],
                                     'need_likes': 1
                                     })
-                        time.sleep(0.5)
+                        # time.sleep(0.5)
                         thread_comments = req_comms.json()['response']['items']
                         for thread_comms in thread_comments:
                             comments.append({

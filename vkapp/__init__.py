@@ -1,7 +1,7 @@
 from flask import Flask, flash, redirect, render_template, request, url_for
 # from vkapp.dbdb import Base
-from vkapp.inputform import Inputform
-from vkapp.parser import posts_collector, comments_collector
+from vkapp.inputform import Inputform, Inputbutton
+from vkapp.parser import check, comments_collector, is_group, posts_collector
 from vkapp.parser import access_token, api_version, offset, count
 
 
@@ -17,23 +17,29 @@ def create_app():
         return render_template('input.html', page_title=title,
                                form=domain_form)
 
-    @app.route('/process_domain', methods=['GET', 'POST'])
+    @app.route('/process_domain', methods=['POST'])
     def process_domain():
         form = Inputform()
         domain = form.domain.data
+        if is_group(domain, access_token, api_version):
+            if form.validate_on_submit():
+            # print("valid!!!!")
+                return redirect(url_for('show_posts', domain=domain))
+        flash('Неверный домен, попробуйте еще раз')
+        return redirect(url_for('input_domain'))
+            # return render_template('input.html', form=form)
 
-        if form.validate_on_submit():
-            print("valid!!!!")
-            return redirect(url_for('show_post', domain=domain))
-        else:
-            # error = 'домен не введен'
-            return render_template('input.html', form=form)
+    @app.route('/<domain>/process_comms', methods=['POST'])
+    def process_comms(domain=None):
+
+        # print("process comms form!!!!")
+        return redirect(url_for('show_comms', domain=domain))
 
     @app.route('/stats/<domain>')
-    def show_post(domain=None):
+    def show_posts(domain=None):
         # print("We are in stats!!!!")
         # print("Domain", domain)
-        title = 'Статистика группы'
+        title = 'Статистика постов'
         get_posts = posts_collector(access_token, api_version,
                                     offset, count, domain)
         number_likes = 0
@@ -50,21 +56,39 @@ def create_app():
                                len_posts=number_of_posts,
                                num_likes=number_likes,
                                num_pics=number_pics,
+                               domain=domain
                                )
 
-    # @app.route('/')
-    # def show_comms():
-    #     get_comms = comments_collector(posts, access_token, api_version,
-    #                                    offset, owner_id)
-    #     num_comm_likes = 0
-    #     for comm in get_comms:
-    #         # print(get_comms)
-    #         num_comm_likes += comm['count_likes']
+    # @app.route('/process_button/', methods=['GET'])
+    # def moving():
+    #     submit = Inputbutton()
+    #     if submit.validate_on_submit():
+    #     return render_template('index.html', form=submit)
+    #     return redirect(url_for('show_comms'))
 
-    #     return render_template('index.html',
-    #                            len_comms=len(get_comms),
-    #                            comm_likes=num_comm_likes,
-    #                            )
+    @app.route('/stats/<domain>/comms')
+    def show_comms(domain=None):
+        # print("We are in stats!!!!")
+        # print("Domain", domain)
+        title = 'Статистика комментов'
+        get_posts = posts_collector(access_token, api_version,
+                                    offset, count, domain)
+
+        owner_id = check(domain, access_token, api_version)
+
+        get_comms = comments_collector(get_posts, access_token, api_version,
+                                       offset, owner_id)
+        num_comm_likes = 0
+        number_of_comms = 0
+        for comm in get_comms:
+            # print(get_comms)
+            num_comm_likes += comm['count_likes']
+            number_of_comms = len(get_comms)
+
+        return render_template('comms.html', page_title=title,
+                               len_comms=number_of_comms,
+                               comm_likes=num_comm_likes,
+                               )
 
     return app
 
