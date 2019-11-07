@@ -10,6 +10,6 @@ class Inputform(FlaskForm):
     submit = SubmitField('Поехали', render_kw={'class': 'btn btn-success'})
 
 
-class Inputbutton(FlaskForm):
-    submit = SubmitField('Дальше', render_kw={'class': 'btn btn-success'})
+# class Inputbutton(FlaskForm):
+#     submit = SubmitField('Дальше', render_kw={'class': 'btn btn-success'})
 

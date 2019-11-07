@@ -1,6 +1,6 @@
 from flask import Flask, flash, redirect, render_template, request, url_for
 # from vkapp.dbdb import Base
-from vkapp.inputform import Inputform, Inputbutton
+from vkapp.inputform import Inputform
 from vkapp.parser import check, comments_collector, is_group, posts_collector
 from vkapp.parser import access_token, api_version, offset, count
 
