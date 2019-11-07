@@ -25,7 +25,7 @@ def create_app():
             if form.validate_on_submit():
             # print("valid!!!!")
                 return redirect(url_for('show_posts', domain=domain))
-        flash('Неверный домен, попробуйте еще раз')
+        flash('Такого сообщества не существует, попробуйте еще раз')
         return redirect(url_for('input_domain'))
             # return render_template('input.html', form=form)
 
@@ -88,6 +88,7 @@ def create_app():
         return render_template('comms.html', page_title=title,
                                len_comms=number_of_comms,
                                comm_likes=num_comm_likes,
+                               domain=domain
                                )
 
     return app

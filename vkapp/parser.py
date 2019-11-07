@@ -92,7 +92,8 @@ def posts_collector(access_token, api_version, offset, count, domain):
                                 'owner_id': post['owner_id'],
                                 'post_likes': post['likes']['count'],
                                 'date': datetime.fromtimestamp(post['date'])
-                                .strftime('%d/%m/%y %H:%M')
+                                .strftime('%d/%m/%y %H:%M'),
+                                'comments_count': post['comments']['count']   
                                 }
                 # print(post.keys())
                     if post.get('attachments'):
@@ -137,102 +138,61 @@ def check(domain, access_token, api_version):
 
 
 def comments_collector(posts, access_token, api_version, offset, owner_id):
-    print("in comments collector!!!!")
+    # print("in comments collector!!!!")
     comments = []
     for post in posts:
-        print("Post ---------", post['id'])
-        response_present = False
-        while response_present is False:
-            req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                                # 'domain': domain,
-                                'offset': 0,
-                                'count': 100,
-                                'access_token': access_token,
-                                'v': api_version,
-                                'post_id': post['id'],
-                                'owner_id': post['owner_id'],
-                                'need_likes': 1
-                                })
-            if 'response' not in req_comms.json().keys():
-                print("SPIM!!!")
-                time.sleep(0.1)
-            else:
-                response_present = True
-
-        wall_comm_number = req_comms.json()['response']['count']
-        if wall_comm_number != 0:
-            comm_read = len(req_comms.json()['response']['items'])
-            # print('len(comm_read) = ', comm_read)
-            # print(req_comms.json()['response']['items'])
-            all_comments = req_comms.json()['response']['items']
-            for comms in all_comments:
-                if comms['thread']['count'] > 0:
-                    comms_response_present = False
-                    while comms_response_present is False:
-                        req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+        # print("POST-----", post)
+        if post['comments_count'] > 0:
+            # print("COUN--------T", post['comments_count'])
+            print("Post ---------", post['id'])
+            response_present = False
+            while response_present is False:
+                # time.sleep(0.2)
+                req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
                                     # 'domain': domain,
                                     'offset': 0,
                                     'count': 100,
                                     'access_token': access_token,
                                     'v': api_version,
                                     'post_id': post['id'],
-                                    'comment_id': comms['id'],
                                     'owner_id': post['owner_id'],
                                     'need_likes': 1
                                     })
+                if 'response' not in req_comms.json().keys():
+                    print("SPIM!!!")
+                    # print(req_comms.json())
+                    time.sleep(0.5)
+                else:
+                    response_present = True
 
-                        if 'response' not in req_comms.json().keys():   
-                            print("SPIM SNOVA!!!")                  
-                            time.sleep(0.1)
-                        else:
-                            comms_response_present = True
-                    thread_comments = req_comms.json()['response']['items']
-                    for thread_comms in thread_comments:
-                        comments.append({
-                            'post_id': thread_comms['post_id'],
-                            'id_comm': thread_comms['id'],
-                            'comms': thread_comms['text'],
-                            'count_likes': thread_comms['likes']['count'],
-                            'date': datetime.fromtimestamp(thread_comms['date']).strftime('%d/%m/%y %H:%M')
-                            })
-                    comm_read += comms['thread']['count']
-                if 'post_id' in comms.keys():  # берем только комменты, где есть post_id (и текст)
-                    comments.append({
-                        'post_id': comms['post_id'],
-                        'id_comm': comms['id'],
-                        'comms': comms['text'],
-                        'count_likes': comms['likes']['count'],
-                        'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
-                        })
-            while comm_read < wall_comm_number:
-                # time.sleep(0.5)
-                req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                                # 'domain': domain,
-                                'offset': comm_read,
-                                'count': 100,
-                                'access_token': access_token,
-                                'v': api_version,
-                                'post_id': post['id'],
-                                'owner_id': post['owner_id'],
-                                'need_likes': 1
-                                })
-                time.sleep(0.1)
+            wall_comm_number = req_comms.json()['response']['count']
+            if wall_comm_number != 0:
+                comm_read = len(req_comms.json()['response']['items'])
+                # print('len(comm_read) = ', comm_read)
+                # print(req_comms.json()['response']['items'])
                 all_comments = req_comms.json()['response']['items']
-                # print('len(all_comments) = ', len(all_comments))
                 for comms in all_comments:
                     if comms['thread']['count'] > 0:
-                        req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
-                                    # 'domain': domain,
-                                    'offset': 0,
-                                    'count': 100,
-                                    'access_token': access_token,
-                                    'v': api_version,
-                                    'post_id': post['id'],
-                                    'comment_id': comms['id'],
-                                    'owner_id': post['owner_id'],
-                                    'need_likes': 1
-                                    })
-                        # time.sleep(0.5)
+                        time.sleep(0.2)
+                        comms_response_present = False
+                        while comms_response_present is False:
+                            req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                                        # 'domain': domain,
+                                        'offset': 0,
+                                        'count': 100,
+                                        'access_token': access_token,
+                                        'v': api_version,
+                                        'post_id': post['id'],
+                                        'comment_id': comms['id'],
+                                        'owner_id': post['owner_id'],
+                                        'need_likes': 1
+                                        })
+
+                            if 'response' not in req_comms.json().keys():   
+                                print("SPIM SNOVA!!!")                  
+                                time.sleep(0.5)
+                            else:
+                                comms_response_present = True
                         thread_comments = req_comms.json()['response']['items']
                         for thread_comms in thread_comments:
                             comments.append({
@@ -243,7 +203,7 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
                                 'date': datetime.fromtimestamp(thread_comms['date']).strftime('%d/%m/%y %H:%M')
                                 })
                         comm_read += comms['thread']['count']
-                    if 'post_id' in comms.keys():
+                    if 'post_id' in comms.keys():  # берем только комменты, где есть post_id (и текст)
                         comments.append({
                             'post_id': comms['post_id'],
                             'id_comm': comms['id'],
@@ -251,7 +211,54 @@ def comments_collector(posts, access_token, api_version, offset, owner_id):
                             'count_likes': comms['likes']['count'],
                             'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
                             })
-                comm_read += len(all_comments)
+                while comm_read < wall_comm_number:
+                    # time.sleep(0.5)
+                    req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                                    # 'domain': domain,
+                                    'offset': comm_read,
+                                    'count': 100,
+                                    'access_token': access_token,
+                                    'v': api_version,
+                                    'post_id': post['id'],
+                                    'owner_id': post['owner_id'],
+                                    'need_likes': 1
+                                    })
+                    time.sleep(0.1)
+                    all_comments = req_comms.json()['response']['items']
+                    # print('len(all_comments) = ', len(all_comments))
+                    for comms in all_comments:
+                        if comms['thread']['count'] > 0:
+                            req_comms = requests.get('https://api.vk.com/method/wall.getComments', {
+                                        # 'domain': domain,
+                                        'offset': 0,
+                                        'count': 100,
+                                        'access_token': access_token,
+                                        'v': api_version,
+                                        'post_id': post['id'],
+                                        'comment_id': comms['id'],
+                                        'owner_id': post['owner_id'],
+                                        'need_likes': 1
+                                        })
+                            # time.sleep(0.5)
+                            thread_comments = req_comms.json()['response']['items']
+                            for thread_comms in thread_comments:
+                                comments.append({
+                                    'post_id': thread_comms['post_id'],
+                                    'id_comm': thread_comms['id'],
+                                    'comms': thread_comms['text'],
+                                    'count_likes': thread_comms['likes']['count'],
+                                    'date': datetime.fromtimestamp(thread_comms['date']).strftime('%d/%m/%y %H:%M')
+                                    })
+                            comm_read += comms['thread']['count']
+                        if 'post_id' in comms.keys():
+                            comments.append({
+                                'post_id': comms['post_id'],
+                                'id_comm': comms['id'],
+                                'comms': comms['text'],
+                                'count_likes': comms['likes']['count'],
+                                'date': datetime.fromtimestamp(comms['date']).strftime('%d/%m/%y %H:%M')
+                                })
+                    comm_read += len(all_comments)
             # print('post ok')
     # print(f'len comments = {len(comments)}')
     return comments
