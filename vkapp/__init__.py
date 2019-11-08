@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, url_for
 # from vkapp.dbdb import Base
 from vkapp.inputform import Inputform
 from vkapp.parser import check, comments_collector, is_group, posts_collector
@@ -70,28 +70,32 @@ def create_app():
     def show_comms(domain=None):
         # print("We are in stats!!!!")
         # print("Domain", domain)
-        title = 'Статистика комментов'
-        get_posts = posts_collector(access_token, api_version,
-                                    offset, count, domain)
+        try:
+            title = 'Статистика комментов'
+            get_posts = posts_collector(access_token, api_version,
+                                        offset, count, domain)
 
-        owner_id = check(domain, access_token, api_version)
+            owner_id = check(domain, access_token, api_version)
 
-        get_comms = comments_collector(get_posts, access_token, api_version,
-                                       offset, owner_id)
-        num_comm_likes = 0
-        number_of_comms = 0
-        for comm in get_comms:
-            # print(get_comms)
-            num_comm_likes += comm['count_likes']
-            number_of_comms = len(get_comms)
+            get_comms = comments_collector(get_posts, access_token, api_version,
+                                           offset, owner_id)
+            num_comm_likes = 0
+            number_of_comms = 0
+            for comm in get_comms:
+                # print(get_comms)
+                num_comm_likes += comm['count_likes']
+                number_of_comms = len(get_comms)
 
-        return render_template('comms.html', page_title=title,
-                               len_comms=number_of_comms,
-                               comm_likes=num_comm_likes,
-                               domain=domain
-                               )
+            return render_template('comms.html', page_title=title,
+                                   len_comms=number_of_comms,
+                                   comm_likes=num_comm_likes,
+                                   domain=domain
+                                   )
+        except(ValueError, KeyError, UnboundLocalError):
+            flash('API ВКшки устала и сломалась, попробуйте другое сообщество')
+            return redirect(url_for('input_domain'))
 
     return app
 
 
-# potomuchtoludi bolshoitheatre nestearussia
+# potomuchtoludi bolshoitheatre nestearussia antipremia redcircule code.help

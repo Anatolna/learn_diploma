@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <nav class="navbar navbar-dark bg-dark">
-      <span class="navbar-brand mb-0 h1">Проект <span style="color:blue">С</span>АШИ И <span style="color:yellow">О</span>ЛЬГИ
+      <span class="navbar-brand mb-0 h1">Проект <span style="color:DodgerBlue">С</span>АШИ И <span style="color:yellow">О</span>ЛЬГИ по работе с данными сообщества ВКонтакте
       </span>
     </nav>
 
@@ -16,14 +16,16 @@
   </head>
   <body>
     <div class='container'>
-    <h1>Статистика сообщества {{ domain }}: </h1>
+    <h1>Статистика сообщества <span style="color:DodgerBlue">{{ domain }}:</span> </h1>
+    <hr style="opacity:0">
     <h1>Посты:</h1>
     <h2>Число постов в данном сообществе: {{ len_posts }}</h2>
     <h2>Число лайков у всех постов: {{ num_likes }}</h2>
     <h2>Число постов с картинками: {{num_pics}}</h2>
+    <hr style="opacity:0">
     <form action={{ url_for("process_comms", domain=domain) }} method="POST">
     <!-- <form action="/stats/{{domain}}/comms" method="POST" -->
-      <button type="submit" class="btn btn-outline-success">Дальше</button>
+      <button type="submit" class="btn btn-outline-primary">Дальше</button>
     </form>
     </div>
     <!-- Optional JavaScript -->
