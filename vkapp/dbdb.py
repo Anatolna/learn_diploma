@@ -13,7 +13,7 @@ from parser import access_token, api_version, offset, count
 # os.remove(r"db_test2.db")
 
 
-engine = create_engine('sqlite:///vkapp.db', echo=True)
+engine = create_engine('sqlite:///vkapp1.db', echo=True)
 """выбираем, с какой базой хотим работать (sqlite)
 и в какой файлик записываем"""
 Base = declarative_base()
@@ -90,7 +90,7 @@ def save_comments(comments):
         save_all(all_comment)
 
 
-# posts = collect_posts('potomuchtoludi')
-# save_posts(posts)
-# comments = collect_comments(posts)
-# save_comments(comments)
+posts = collect_posts('potomuchtoludi')
+save_posts(posts)
+comments = collect_comments(posts)
+save_comments(comments)

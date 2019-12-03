@@ -13,6 +13,7 @@ count = 100
 # domain = 'potomuchtoludi'
 # domain = input('Введите сообщество: ')
 # owner_id_inputed = input('Введите сообщество: ')
+# potomuchtoludi bolshoitheatre nestearussia redcircule code.help webhleb
 
 
 def is_group(domain, access_token, api_version):
@@ -63,9 +64,10 @@ def posts_collector(access_token, api_version, offset, count, domain):
                             'extended': 1              
                             })
                 req_wall.raise_for_status()
-                if 'response' not in req_wall.json().keys(): 
+                print('bdhjdkfdbv----', req_wall.text)
+                if 'response' not in req_wall.json().keys():
                     print("SPIM TYTYTY!!!")                    
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                 else:
                     response_present = True
             
